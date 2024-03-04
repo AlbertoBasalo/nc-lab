@@ -6,8 +6,8 @@
 
 ```bash
 # generate choosing version without global installation
-npx -p @angular/cli@15.2.2 ng new fic-ng_dev-23_03
-cd fic-ng_dev-23_03
+ npx -p @angular/cli@15.2.2 ng new ActivityBookings --prefix=lab --routing --style=css
+cd ActivityBookings
 # start development server
 npm start
 # build deployable app
@@ -94,7 +94,6 @@ body {
 span {
   margin-right: 0.5rem;
 }
-
 ```
 
 ## 1 - Components
@@ -142,12 +141,7 @@ Home page with list of published activities
 ```typescript
 export type Id = string | number;
 export type AgeCategory = "adult" | "child" | "family";
-export type ActivityStates =
-  | "draft"
-  | "published"
-  | "cancelled"
-  | "confirmed"
-  | "finished";
+export type ActivityStates = "draft" | "published" | "cancelled" | "confirmed" | "finished";
 export type Activity = {
   ageCategory: AgeCategory;
   currency: string;
