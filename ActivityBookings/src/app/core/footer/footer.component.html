@@ -1,1 +1,11 @@
-<p>footer works!</p>
+<footer>
+  <nav>
+    <span>
+      <a [href]="author.homepage" target="_blank"> © {{ getYear() }} {{ author.name }} </a>
+    </span>
+    <span>
+      <button (click)="onAcceptClick()" class="secondary outline">Accept Cookies</button>
+      <small>🍪 ✅ : {{ cookiesAccepted }}</small>
+    </span>
+  </nav>
+</footer>

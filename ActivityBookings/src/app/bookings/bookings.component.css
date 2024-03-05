@@ -1,0 +1,22 @@
+.draft {
+  color: violet;
+  font-style: italic;
+}
+.published {
+  color: limegreen;
+}
+.confirmed {
+  color: green;
+}
+.sold-out {
+  color: green;
+  font-style: italic;
+}
+.done {
+  color: orange;
+  font-style: italic;
+}
+.cancelled {
+  color: red;
+  font-style: italic;
+}
