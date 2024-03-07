@@ -3,5 +3,9 @@
     <ul>
       <a href="/" class="title">{{ title }}</a>
     </ul>
+    <ul>
+      <li><a [routerLink]="['/', 'auth', 'login']">Login</a></li>
+      <li><a [routerLink]="['/', 'auth', 'register']">Register</a></li>
+    </ul>
   </nav>
 </header>

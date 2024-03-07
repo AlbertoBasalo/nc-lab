@@ -7,36 +7,22 @@ Páginas de contenido dinámico
 ### 4.1.1 Configuración y router outlet
 
 ```typescript
-// provideRouter en app.config
-export const appConfig: ApplicationConfig = {
-  providers: [provideRouter(routes), provideClientHydration()],
-};
-//  app.routes.json
-// / (bookingsComponent)
-export const routes: Routes = [
+// app-routing.module.ts
+const routes: Routes = [
   {
     path: "",
-    loadComponent: () => import("./bookings/bookings.component").then((m) => m.BookingsComponent),
+    component: BookingsComponent,
   },
 ];
 ```
 
-```typescript
-// App component y router outlet
-@Component({
-  selector: "lab-root",
-  standalone: true,
-  imports: [RouterOutlet, HeaderComponent, FooterComponent],
-})
-export class AppComponent {}
-```
-
 ```html
-<lab-header />
+<lab-header></lab-header>
 <main>
-  <router-outlet />
+  <!-- <lab-bookings></lab-bookings> -->
+  <router-outlet></router-outlet>
 </main>
-<lab-footer />
+<lab-footer></lab-footer>
 ```
 
 ```css
@@ -46,28 +32,41 @@ main {
 }
 ```
 
-### 4.1.2 Router link
-
-`ng g c routes/auth/login`
+```bash
+ng g m routes/auth/login --routing
+ng g c routes/auth/login
+```
 
 ```typescript
-// /auth/login LoginComponent
-{
-  path: 'auth/login',
-  loadComponent: () => import('./auth/login.component').then((m) => m.LoginComponent),
-},
+// app-routing.module.ts
+const routes: Routes = [
+  {
+    path: "auth/login",
+    loadChildren: () => import("./routes/auth/login/login.module").then((m) => m.LoginModule),
+  },
+];
+```
 
+```typescript
+// login-routing.module.ts
+const routes: Routes = [{ path: "", component: LoginComponent }];
+```
+
+### 4.1.2 Router link
+
+` ng g m routes/auth/register --route=auth/register -m=app`
+
+```typescript
 // HeaderComponent [routerLink] / /login
 @Component({
-  selector: 'lab-header',
-  standalone: true,
+  selector: "lab-header",
   imports: [RouterLink],
   template: ``,
   styles: ``,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeaderComponent {
-  title = 'Activity Bookings';
+  title = "Activity Bookings";
 }
 ```
 
@@ -77,44 +76,15 @@ export class HeaderComponent {
     <a [routerLink]="['/']">
       <strong>{{ title }}</strong>
     </a>
-    <a [routerLink]="['/auth', 'login']">Login</a>
+    <a [routerLink]="['/','auth', 'login']">Login</a>
+    <a [routerLink]="['/','auth', 'register']">Register</a>
   </nav>
 </header>
 ```
 
-### 4.1.3 Page components
-
-`ng g c routes/auth/register --skip-selector --type=page`
-
 ```typescript
-// register.page.ts
-@Component({
-  standalone: true,
-  imports: [],
-  template: `
-    <p>register works!</p>
-  `,
-  styles: ``,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-})
-export default class RegisterPage {}
-```
-
-```json
-// .eslintrc.json
-"rules": {
-    "prettier/prettier": "warn",
-    "@angular-eslint/component-class-suffix": [
-      "error",
-      {
-        "suffixes": ["Component", "Page", "Template", "Widget"]
-      }
-    ],
-// app.routes.es
-{
-  path: 'auth/register',
-  loadComponent: () => import('./auth/register.page'),
-},
+    // core.module.ts
+  imports: [CommonModule, RouterModule],
 ```
 
 ```typescript
@@ -122,7 +92,6 @@ export default class RegisterPage {}
 
 @Component({
   selector: "lab-login",
-  standalone: true,
   imports: [RouterLink],
   template: ``,
   styles: ``,
@@ -157,7 +126,6 @@ export default class LoginComponent {}
 
 ```typescript
 @Component({
-  standalone: true,
   imports: [RouterLink],
   template: ``,
   styles: ``,
@@ -245,7 +213,6 @@ export const routes: Routes = [
 ```typescript
 // homePage activity list
 @Component({
-  standalone: true,
   imports: [CurrencyPipe, DatePipe, RouterLink],
   template: ``,
   styles: ``,
@@ -275,6 +242,8 @@ export default class HomePage {
   </main>
 </article>
 ```
+
+> To Do: classic syntax
 
 ### 4.2.2 Recepción reactiva de parámetros como señales
 
