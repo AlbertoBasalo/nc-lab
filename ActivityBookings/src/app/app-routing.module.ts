@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { BookingsComponent } from './bookings/bookings.component';
 
+/** Array of route objects, linking a path wit a component or a lazy router module */
 const routes: Routes = [
   {
     path: '',
@@ -17,6 +18,7 @@ const routes: Routes = [
   },
 ];
 
+/** Root router module */
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule],

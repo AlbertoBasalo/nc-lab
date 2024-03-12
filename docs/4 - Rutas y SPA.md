@@ -170,7 +170,7 @@ export default class RegisterPage {}
 </article>
 ```
 
-## 4.2 Parámetros en las rutas, señales en los componentes.
+## 4.2 Parámetros en las rutas, observables en los componentes.
 
 ### 4.2.1 Configuración y envío
 
@@ -194,18 +194,18 @@ export const ACTIVITIES: Activity[] = [
   },...
 ```
 
-`ng g c routes/home --skip-selector --type=page`
+`ng g m routes/home --route=home -m=app`
 
 ```typescript
 // config with routed params
 export const routes: Routes = [
   {
-    path: "",
-    loadComponent: () => import("./routes/home.page"),
+    home',
+    loadChildren: () => import('./routes/home/home.module').then((m) => m.HomeModule),
   },
   {
     path: "bookings/:slug",
-    loadComponent: () => import("./routes/bookings/bookings.page"),
+    loadChildren: () => import('./routes/bookings/bookings.module').then((m) => m.BookingsModule),
   },
 ];
 ```
@@ -229,8 +229,7 @@ export default class HomePage {
     <h2>Activities</h2>
   </header>
   <main>
-    @for (activity of activities; track activity.id) {
-    <div>
+    <div *ngFor="let activity of activities">
       <span>
         <a [routerLink]="['/bookings', activity.slug]">{{ activity.name }}</a>
       </span>
@@ -238,7 +237,6 @@ export default class HomePage {
       <span>{{ activity.price | currency }}</span>
       <span>{{ activity.date | date : "dd-MMM-yyyy" }}</span>
     </div>
-    }
   </main>
 </article>
 ```
@@ -248,136 +246,17 @@ export default class HomePage {
 ### 4.2.2 Recepción de parámetros
 
 ```typescript
-provideRouter(routes, withComponentInputBinding());
+class BookingComponent {
+  slug = "";
 
-// slug input en BookingsPage
-slug = input<string>();
+  activity = NULL_ACTIVITY;
 
-activity = computed(() => ACTIVITIES.find((a) => a.slug === this.slug()) || NULL_ACTIVITY);
-```
-
-```typescript
-// full reactive signal based component
-export default class BookingsPage {
-  slug = input<string>();
-  activity = computed(() => ACTIVITIES.find((a) => a.slug === this.slug()) || NULL_ACTIVITY);
-  alreadyParticipants = computed(() => Math.floor(Math.random() * this.activity().maxParticipants));
-  maxNewParticipants = computed(() => this.activity().maxParticipants - this.alreadyParticipants());
-  isBookable = computed(() => ["published", "confirmed"].includes(this.activity().status));
-
-  newParticipants = signal(0);
-  booked = signal(false);
-  participants = signal<{ id: number }[]>([]);
-
-  totalParticipants = computed(() => this.alreadyParticipants() + this.newParticipants());
-  remainingPlaces = computed(() => this.activity().maxParticipants - this.totalParticipants());
-  bookingAmount = computed(() => this.newParticipants() * this.activity().price);
-
-  bookedMessage = computed(() => {
-    if (this.booked()) return `Booked USD ${this.bookingAmount()}`;
-    return "";
-  });
-
-  constructor() {
-    effect(
-      () => {
-        this.participants.update((participants) => {
-          participants.splice(0, participants.length);
-          for (let i = 0; i < this.totalParticipants(); i++) {
-            participants.push({ id: participants.length + 1 });
-          }
-          return participants;
-        });
-      },
-      {
-        allowSignalWrites: true,
-      }
-    );
-    effect(() => {
-      if (!this.isBookable()) {
-        return;
-      }
-      const totalParticipants = this.totalParticipants();
-      const activity = this.activity();
-      let newStatus = activity.status;
-      if (totalParticipants >= activity.maxParticipants) {
-        newStatus = "sold-out";
-      } else if (totalParticipants >= activity.minParticipants) {
-        newStatus = "confirmed";
-      } else {
-        newStatus = "published";
-      }
-      activity.status = newStatus;
+  constructor(private route: ActivatedRoute) {
+    this.route.params.subscribe((params) => {
+      this.slug = params.slug;
+      this.activity = ACTIVITIES.find((activity) => activity.slug === this.slug);
     });
   }
-
-  onNewParticipantsChange(newParticipants: number) {
-    if (newParticipants > this.maxNewParticipants()) {
-      newParticipants = this.maxNewParticipants();
-    }
-    this.newParticipants.set(newParticipants);
-  }
-
-  onBookClick() {
-    this.booked.set(true);
-  }
-}
-```
-
-```html
-@if (activity(); as activity) {
-<article>
-  <header>
-    <h2>{{ activity.name }}</h2>
-    <div [class]="activity.status">
-      <span>{{ activity.location }}</span>
-      <span>{{ activity.price | currency }}</span>
-      <span>{{ activity.date | date: 'dd-MMM-yyyy' }}</span>
-      <span>{{ activity.status | uppercase }}</span>
-    </div>
-  </header>
-  <main>
-    <h4>Participants</h4>
-    <div>Already Participants: {{ alreadyParticipants() }}</div>
-    <div>Max Participants: {{ activity.maxParticipants }}</div>
-    <ul>
-      <li>New Participants: {{ newParticipants() }}</li>
-      <li>Remaining places: {{ remainingPlaces() }}</li>
-      <li>Total participants: {{ totalParticipants() }}</li>
-    </ul>
-    <div>
-      @for (participant of participants(); track participant.id) {
-      <span [attr.data-tooltip]="participant.id">🏃</span>
-      } @empty {
-      <span>🕸️</span>
-      }
-    </div>
-  </main>
-  <footer>
-    @if (isBookable()) {
-    <h4>New Bookings</h4>
-    @if (remainingPlaces() > 0) {
-    <label for="newParticipants">How many participants want to book?</label>
-    <input
-      type="number"
-      name="newParticipants"
-      [ngModel]="newParticipants()"
-      (ngModelChange)="onNewParticipantsChange($event)"
-      min="0"
-      [max]="maxNewParticipants()" />
-    } @else {
-    <div>
-      <button class="secondary outline" (click)="onNewParticipantsChange(0)">Reset</button>
-      <span>No more places available</span>
-    </div>
-    }
-    <button [disabled]="booked() || newParticipants() === 0" (click)="onBookClick()">
-      Book {{ newParticipants() }} places now for {{ bookingAmount() | currency }}!
-    </button>
-    <div>{{ bookedMessage() }}</div>
-    }
-  </footer>
-</article>
 }
 ```
 
