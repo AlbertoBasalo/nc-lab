@@ -231,7 +231,7 @@ export default class HomePage {
   <main>
     <div *ngFor="let activity of activities">
       <span>
-        <a [routerLink]="['/bookings', activity.slug]">{{ activity.name }}</a>
+        <a [routerLink]="['/' , 'bookings' , activity.slug]">{{ activity.name }}</a>
       </span>
       <span>{{ activity.location }}</span>
       <span>{{ activity.price | currency }}</span>
@@ -274,13 +274,12 @@ npm start
 
 ### 4.3.2 Indexación de contenido SSR
 
+> ToDo...
+
 ```bash
 
 # build and node serve
 npm run build
-npm run serve:ssr:ActivityBookings
-# full
-npm run serve
 ```
 
 ### 4.3.3 SEO y metadatos
