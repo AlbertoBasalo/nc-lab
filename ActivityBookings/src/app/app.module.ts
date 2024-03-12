@@ -7,6 +7,7 @@ import { BookingsComponent } from './bookings/bookings.component';
 import { CoreModule } from './core/core.module';
 import { SharedModule } from './shared/shared.module';
 
+/** Root module with root component and main module imports*/
 @NgModule({
   declarations: [AppComponent, BookingsComponent],
   imports: [BrowserModule, AppRoutingModule, CoreModule, SharedModule],
