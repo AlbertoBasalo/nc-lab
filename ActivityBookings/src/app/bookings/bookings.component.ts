@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { ACTIVITIES } from '../shared/domain/activities.data';
 import { Activity } from '../shared/domain/activity.type';
+import { Participant } from '../shared/domain/participant.type';
 
 @Component({
   selector: 'lab-bookings',
@@ -8,41 +9,46 @@ import { Activity } from '../shared/domain/activity.type';
   styleUrls: ['./bookings.component.css'],
 })
 export class BookingsComponent {
+  /** Activity object selecto from the array */
   public activity: Activity = ACTIVITIES[3];
 
+  /**  Supposed already booked places */
   public currentParticipants: number = 2;
 
+  /** The participants booked on this session*/
   public newParticipants: number = 0;
 
-  public newParticipantsData: any[] = [];
+  /** Array with the new participants data */
+  public newParticipantsData: Participant[] = [];
 
+  /** Current plus new participants*/
   public totalParticipants: number = this.currentParticipants + this.newParticipants;
 
+  /** The maximum available places */
   public maxNewParticipants: number = this.activity.maxParticipants - this.currentParticipants;
 
+  /** Flag indicating if the booking was saved*/
   public booked: boolean = false;
 
+  /** Message indicating the range of places available*/
   public activityRangeMessage: string = `The activity is available for ${this.activity.minParticipants} to ${this.activity.maxParticipants} participants`;
 
+  /** Feedback message whe the booking is saved */
+  public bookedMessage: string = '';
+
+  /** Function to enable or disable the booking button */
   public getDisableBookingButton(): boolean {
+    // Fast and cheap to run, even if called multiple times.
     return this.newParticipants === 0;
   }
 
-  public bookedMessage: string = '';
-  // public getBookedMessage(): string {
-  //   return `Booked ${this.totalParticipants} participants for ${
-  //     this.activity.price * this.totalParticipants
-  //   } dollars`;
-  // }
-
+  /** Function to return a message for each participant */
   public getParticipantsMessage(participant: any): string {
+    // ToDo: Should be substituted with th participant pipe
     return `Participant ${participant.id}: ${participant.name} (${participant.age} years old)`;
   }
 
-  // public getTotalParticipants(): number {
-  //   return this.currentParticipants + this.newParticipants;
-  // }
-
+  /** Event handler fired when the inout elements has user changes */
   public onNewParticipantsChange(event: any) {
     const input: HTMLInputElement = event.target;
     const value = input.value;
@@ -54,12 +60,14 @@ export class BookingsComponent {
     for (let i = 0; i < this.newParticipants; i++) {
       this.newParticipantsData.push({
         id: i + 1,
+        bookingId: 0,
         name: 'Name_' + (i + 1),
         age: 3 * i + 7,
       });
     }
   }
 
+  /** Event handler fired whe user clicks the booking button */
   public onBookClick() {
     console.log('Reservar actividad', this.totalParticipants);
     this.booked = true;

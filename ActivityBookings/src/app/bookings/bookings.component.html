@@ -28,7 +28,7 @@
     <div *ngIf="booked">
       <p>{{ bookedMessage }}</p>
       <ul>
-        <li *ngFor="let participant of newParticipantsData">🏃‍♂️ {{ getParticipantsMessage(participant) }}</li>
+        <li *ngFor="let p of newParticipantsData">🏃‍♂️ {{ p | participant }}</li>
       </ul>
     </div>
   </footer>

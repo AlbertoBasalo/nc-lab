@@ -268,3 +268,51 @@ export class BookingsComponent {
     }
   }
 ```
+
+## 3.5 Custom pipe
+
+```bash
+ng g m shared
+ng g p shared/pipes/participant
+```
+
+```typescript
+// shared.module.ts
+@NgModule({
+  declarations: [ParticipantPipe],
+  imports: [CommonModule],
+  exports: [ParticipantPipe],
+})
+export class SharedModule {}
+
+// app.module.ts
+@NgModule({
+  declarations: [AppComponent, BookingsComponent],
+  imports: [BrowserModule, AppRoutingModule, CoreModule, SharedModule],
+  providers: [],
+  bootstrap: [AppComponent],
+})
+export class AppModule {}
+```
+
+```typescript
+// participant.pipe.ts
+import { Pipe, PipeTransform } from "@angular/core";
+import { Participant } from "../domain/participant.type";
+
+@Pipe({
+  name: "participant",
+})
+export class ParticipantPipe implements PipeTransform {
+  transform(value: Participant, ...args: unknown[]): unknown {
+    return `Participant ${value.id} - ${value.name} - ${value.age} years old`;
+  }
+}
+```
+
+```html
+<!-- bookings.component.html -->
+<ul>
+  <li *ngFor="let p of newParticipantsData">🏃‍♂️ {{ p | participant }}</li>
+</ul>
+```
