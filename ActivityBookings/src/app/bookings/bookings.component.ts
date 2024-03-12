@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { ACTIVITIES } from '../shared/domain/activities.data';
 import { Activity } from '../shared/domain/activity.type';
 
 @Component({
@@ -7,40 +8,71 @@ import { Activity } from '../shared/domain/activity.type';
   styleUrls: ['./bookings.component.css'],
 })
 export class BookingsComponent {
-  activity: Activity = {
-    name: 'Paddle surf',
-    location: 'Lake Leman at Lausanne',
-    price: 100,
-    date: new Date(2025, 7, 15),
-    minParticipants: 4,
-    maxParticipants: 10,
-    status: 'published',
-    id: 1,
-    slug: 'paddle-surf',
-    duration: 2,
-    userId: 1,
-  };
-  alreadyParticipants = 3;
-  newParticipants = 0;
-  totalParticipants = () => this.alreadyParticipants + this.newParticipants;
-  remainingPlaces = () => this.activity.maxParticipants - this.totalParticipants();
+  public activity: Activity = ACTIVITIES[3];
 
-  participants = [{ id: 1 }, { id: 2 }, { id: 3 }];
+  public currentParticipants: number = 2;
 
-  booked = false;
+  public newParticipants: number = 0;
 
-  onNewParticipantsChange(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const participants: number = parseInt(input.value);
-    this.newParticipants = participants;
-    this.participants = [];
-    for (let i = 1; i <= this.totalParticipants(); i++) {
-      this.participants.push({ id: i });
-    }
-    console.log('New participants:', participants);
+  public newParticipantsData: any[] = [];
+
+  public totalParticipants: number = this.currentParticipants + this.newParticipants;
+
+  public maxNewParticipants: number = this.activity.maxParticipants - this.currentParticipants;
+
+  public booked: boolean = false;
+
+  public activityRangeMessage: string = `The activity is available for ${this.activity.minParticipants} to ${this.activity.maxParticipants} participants`;
+
+  public getDisableBookingButton(): boolean {
+    return this.newParticipants === 0;
   }
-  onBookClick(): void {
-    console.log('Booking for', this.newParticipants, 'participants');
+
+  public bookedMessage: string = '';
+  // public getBookedMessage(): string {
+  //   return `Booked ${this.totalParticipants} participants for ${
+  //     this.activity.price * this.totalParticipants
+  //   } dollars`;
+  // }
+
+  public getParticipantsMessage(participant: any): string {
+    return `Participant ${participant.id}: ${participant.name} (${participant.age} years old)`;
+  }
+
+  // public getTotalParticipants(): number {
+  //   return this.currentParticipants + this.newParticipants;
+  // }
+
+  public onNewParticipantsChange(event: any) {
+    const input: HTMLInputElement = event.target;
+    const value = input.value;
+    console.log('el input ha cambiado', value);
+    this.newParticipants = parseInt(value, 10);
+    this.totalParticipants = this.currentParticipants + this.newParticipants;
+    //this.disableBookingButton = this.newParticipants === 0;
+    this.newParticipantsData = [];
+    for (let i = 0; i < this.newParticipants; i++) {
+      this.newParticipantsData.push({
+        id: i + 1,
+        name: 'Name_' + (i + 1),
+        age: 3 * i + 7,
+      });
+    }
+  }
+
+  public onBookClick() {
+    console.log('Reservar actividad', this.totalParticipants);
     this.booked = true;
+    this.bookedMessage = `Booked ${this.newParticipants} participants for ${
+      this.activity.price * this.newParticipants
+    } dollars`;
+    if (this.totalParticipants === this.activity.maxParticipants) {
+      this.activity.status = 'sold-out';
+      return;
+    }
+    if (this.totalParticipants >= this.activity.minParticipants) {
+      this.activity.status = 'confirmed';
+      return;
+    }
   }
 }

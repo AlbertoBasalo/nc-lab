@@ -4,28 +4,32 @@
     <div [class]="activity.status">
       <span>{{ activity.location }}</span>
       <span>{{ activity.price | currency }}</span>
-      <span>{{ activity.date | date }}</span>
-      <span>{{ activity.status | uppercase }} </span>
+      <span>{{ activity.date | date: 'dd-MMM-yyyy' }}</span>
+      <span>{{ activity.status | uppercase }}</span>
     </div>
   </header>
   <main>
-    <h4>Participants</h4>
-    <div>Already Participants: {{ alreadyParticipants }}</div>
-    <div>New participants: {{ newParticipants }}</div>
-    <div>Total participants: {{ totalParticipants() }}</div>
-    <div>
-      <span *ngFor="let p of participants">🏃‍♂️ {{ p.id }}</span>
-    </div>
+    <p>{{ activityRangeMessage }}</p>
+    <p>Current Participants: {{ currentParticipants }}</p>
+    <p>Total Participants: {{ totalParticipants }}</p>
   </main>
   <footer>
-    <h4>New Bookings</h4>
-    <section *ngIf="remainingPlaces() > 0">
+    <div *ngIf="!booked">
       <label for="newParticipants">How many participants want to book?</label>
-      <input type="number" [value]="newParticipants" (change)="onNewParticipantsChange($event)" />
-    </section>
-    <section *ngIf="remainingPlaces() === 0">
-      <p>Sorry, no more places available</p>
-    </section>
-    <button [disabled]="booked || newParticipants === 0" (click)="onBookClick()">Book now!</button>
+      <input
+        name="newParticipants"
+        type="number"
+        [max]="maxNewParticipants"
+        min="0"
+        [value]="newParticipants"
+        (change)="onNewParticipantsChange($event)" />
+      <button [disabled]="getDisableBookingButton()" (click)="onBookClick()">Book now!</button>
+    </div>
+    <div *ngIf="booked">
+      <p>{{ bookedMessage }}</p>
+      <ul>
+        <li *ngFor="let participant of newParticipantsData">🏃‍♂️ {{ getParticipantsMessage(participant) }}</li>
+      </ul>
+    </div>
   </footer>
 </article>

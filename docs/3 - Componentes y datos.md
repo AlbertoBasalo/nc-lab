@@ -137,21 +137,26 @@ export class BookingsComponent {
     <div [class]="activity.status">
       <span>{{ activity.location }}</span>
       <span>{{ activity.price | currency }}</span>
-      <span>{{ activity.date | date }}</span>
+      <span>{{ activity.date | date: 'dd-MMM-yyyy' }}</span>
       <span>{{ activity.status | uppercase }}</span>
     </div>
   </header>
   <main>
-    <h4>Participants</h4>
-    <div>Already Participants: {{ alreadyParticipants }}</div>
-    <div>New participants: {{ newParticipants }}</div>
-    <div>Total participants: {{ totalParticipants() }}</div>
+    <p>{{ activityRangeMessage }}</p>
+    <p>Current Participants: {{ currentParticipants }}</p>
+    <p>Total Participants: {{ totalParticipants }}</p>
   </main>
   <footer>
-    <h4>New Bookings</h4>
     <label for="newParticipants">How many participants want to book?</label>
-    <input type="number" [value]="newParticipants" (change)="onNewParticipantsChange($event)" />
-    <button [disabled]="booked || newParticipants === 0" (click)="onBookClick()">Book now!</button>
+    <input
+      name="newParticipants"
+      type="number"
+      [max]="maxNewParticipants"
+      min="0"
+      [value]="newParticipants"
+      (change)="onNewParticipantsChange($event)" />
+    <button [disabled]="getDisableBookingButton()" (click)="onBookClick()">Book now!</button>
+    <p>{{ bookedMessage }}</p>
   </footer>
 </article>
 ```
@@ -159,34 +164,41 @@ export class BookingsComponent {
 ```typescript
 // bookings.component.ts
 export class BookingsComponent {
-  activity: Activity = {
-    name: "Paddle surf",
-    location: "Lake Leman at Lausanne",
-    price: 100,
-    date: new Date(2025, 7, 15),
-    minParticipants: 4,
-    maxParticipants: 10,
-    status: "published",
-    id: 1,
-    slug: "paddle-surf",
-    duration: 2,
-    userId: 1,
-  };
-  alreadyParticipants = 3;
-  newParticipants = 0;
-  totalParticipants = () => this.alreadyParticipants + this.newParticipants;
+  public activity: Activity = ACTIVITIES[3];
 
-  booked = false;
+  public currentParticipants: number = 2;
+
+  public newParticipants: number = 0;
+
+  public totalParticipants: number = this.currentParticipants + this.newParticipants;
+
+  public maxNewParticipants: number = this.activity.maxParticipants - this.currentParticipants;
+
+  public bookedMessage: string = "";
+
+  public getDisableBookingButton(): boolean {
+    return this.newParticipants === 0;
+  }
 
   onNewParticipantsChange(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const participants: number = parseInt(input.value);
-    this.newParticipants = participants;
-    console.log("New participants:", participants);
+    const input: HTMLInputElement = event.target;
+    const value = input.value;
+    console.log("el input ha cambiado", value);
+    this.newParticipants = parseInt(value, 10);
+    this.totalParticipants = this.currentParticipants + this.newParticipants;
   }
   onBookClick(): void {
-    console.log("Booking for", this.newParticipants, "participants");
-    this.booked = true;
+    this.bookedMessage = `Booked ${this.newParticipants} participants for ${
+      this.activity.price * this.newParticipants
+    } dollars`;
+    if (this.totalParticipants === this.activity.maxParticipants) {
+      this.activity.status = "sold-out";
+      return;
+    }
+    if (this.totalParticipants >= this.activity.minParticipants) {
+      this.activity.status = "confirmed";
+      return;
+    }
   }
 }
 ```
@@ -195,37 +207,64 @@ export class BookingsComponent {
 
 ```html
 <footer>
-  <h4>New Bookings</h4>
-  <section *ngIf="remainingPlaces() > 0">
+  <div *ngIf="!booked">
     <label for="newParticipants">How many participants want to book?</label>
-    <input type="number" [value]="newParticipants" (change)="onNewParticipantsChange($event)" />
-  </section>
-  <section *ngIf="remainingPlaces() === 0">
-    <p>Sorry, no more places available</p>
-  </section>
-  <button [disabled]="booked || newParticipants === 0" (click)="onBookClick()">Book now!</button>
+    <input
+      name="newParticipants"
+      type="number"
+      [max]="maxNewParticipants"
+      min="0"
+      [value]="newParticipants"
+      (change)="onNewParticipantsChange($event)" />
+    <button [disabled]="getDisableBookingButton()" (click)="onBookClick()">Book now!</button>
+  </div>
+  <div *ngIf="booked">
+    <p>{{ bookedMessage }}</p>
+    <ul>
+      <li *ngFor="let participant of newParticipantsData">🏃‍♂️ {{ getParticipantsMessage(participant) }}</li>
+    </ul>
+  </div>
 </footer>
 ```
 
 ```typescript
-remainingPlaces = () => this.activity.maxParticipants - this.totalParticipants();
-```
-
-```html
-<div>
-  <span *ngFor="let p of participants">🏃‍♂️ {{ p.id }}</span>
-</div>
+export class BookingsComponent {
+  public newParticipantsData: any[] = [];
+  public booked: boolean = false;
+}
 ```
 
 ```typescript
-onNewParticipantsChange(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const participants: number = parseInt(input.value);
-    this.newParticipants = participants;
-    this.participants = [];
-    for (let i = 1; i <= this.totalParticipants(); i++) {
-      this.participants.push({ id: i });
+  public onNewParticipantsChange(event: any) {
+    const input: HTMLInputElement = event.target;
+    const value = input.value;
+    console.log('el input ha cambiado', value);
+    this.newParticipants = parseInt(value, 10);
+    this.totalParticipants = this.currentParticipants + this.newParticipants;
+    //this.disableBookingButton = this.newParticipants === 0;
+    this.newParticipantsData = [];
+    for (let i = 0; i < this.newParticipants; i++) {
+      this.newParticipantsData.push({
+        id: i + 1,
+        name: 'Name_' + (i + 1),
+        age: 3 * i + 7,
+      });
     }
-    console.log('New participants:', participants);
+  }
+
+  public onBookClick() {
+    console.log('Reservar actividad', this.totalParticipants);
+    this.booked = true;
+    this.bookedMessage = `Booked ${this.newParticipants} participants for ${
+      this.activity.price * this.newParticipants
+    } dollars`;
+    if (this.totalParticipants === this.activity.maxParticipants) {
+      this.activity.status = 'sold-out';
+      return;
+    }
+    if (this.totalParticipants >= this.activity.minParticipants) {
+      this.activity.status = 'confirmed';
+      return;
+    }
   }
 ```

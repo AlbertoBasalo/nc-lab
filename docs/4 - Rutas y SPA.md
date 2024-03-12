@@ -54,7 +54,7 @@ const routes: Routes = [{ path: "", component: LoginComponent }];
 
 ### 4.1.2 Router link
 
-` ng g m routes/auth/register --route=auth/register -m=app`
+`ng g m routes/auth/register --route=auth/register -m=app`
 
 ```typescript
 // HeaderComponent [routerLink] / /login
@@ -245,7 +245,7 @@ export default class HomePage {
 
 > To Do: classic syntax
 
-### 4.2.2 Recepción reactiva de parámetros como señales
+### 4.2.2 Recepción de parámetros
 
 ```typescript
 provideRouter(routes, withComponentInputBinding());
@@ -402,5 +402,26 @@ npm run build
 npm run serve:ssr:ActivityBookings
 # full
 npm run serve
+```
 
+### 4.3.3 SEO y metadatos
+
+```typescript
+export default class BookingsPage {
+  constructor(title: Title, meta: Meta) {
+    const activity = this.activity;
+    title.setTitle(activity.name);
+    const description = `${activity.name} in ${activity.location} on ${activity.date} for ${activity.price}`;
+    meta.updateTag({ name: "description", content: description });
+  }
+}
+```
+
+```typescript
+export default class HomePage {
+  constructor(title: Title, meta: Meta) {
+    title.setTitle("Activities to book");
+    meta.updateTag({ name: "description", content: "Activities to book" });
+  }
+}
 ```
