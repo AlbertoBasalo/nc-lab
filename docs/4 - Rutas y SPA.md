@@ -241,8 +241,6 @@ export default class HomePage {
 </article>
 ```
 
-> To Do: classic syntax
-
 ### 4.2.2 Recepción de parámetros
 
 ```typescript
