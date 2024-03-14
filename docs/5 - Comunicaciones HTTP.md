@@ -46,6 +46,8 @@ export class HomeComponent {
 }
 ```
 
+> To Do: async | version
+
 ```typescript
 export class BookingsComponent {
   /**
