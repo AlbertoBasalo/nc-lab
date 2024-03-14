@@ -1,11 +1,15 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { BookingsComponent } from './bookings/bookings.component';
+import { BookingsComponent } from './routes/bookings/bookings.component';
 
-/** Array of route objects, linking a path wit a component or a lazy router module */
+/** Array of route objects, linking a path with a component or a lazy router module */
 const routes: Routes = [
   {
     path: '',
+    loadChildren: () => import('./routes/home/home.module').then((m) => m.HomeModule),
+  },
+  {
+    path: 'bookings/:slug',
     component: BookingsComponent,
   },
   {

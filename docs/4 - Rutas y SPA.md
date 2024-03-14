@@ -247,13 +247,13 @@ export default class HomePage {
 
 ```typescript
 class BookingComponent {
-  slug = "";
+  activitySlug = "";
 
   activity = NULL_ACTIVITY;
 
-  constructor(private route: ActivatedRoute) {
+  constructor(route: ActivatedRoute) {
     this.activitySlug = route.snapshot.params["slug"];
-    this.activity = ACTIVITIES.find((activity) => activity.slug === this.slug);
+    this.activity = ACTIVITIES.find((activity) => activity.slug === this.activitySlug) || NULL_ACTIVITY;
   }
 }
 ```
