@@ -1,5 +1,7 @@
+import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Booking } from 'src/app/shared/domain/booking.type';
 import { ACTIVITIES } from '../../shared/domain/activities.data';
 import { Activity, NULL_ACTIVITY } from '../../shared/domain/activity.type';
 import { Participant } from '../../shared/domain/participant.type';
@@ -41,13 +43,22 @@ export class BookingsComponent {
   public activitySlug: string = '';
 
   /**
-   * Component constructor
+   * Bookings Component constructor
    * @param route The router service injected by Angular
+   * @param http The HttpClient service injected by Angular
    */
-  constructor(route: ActivatedRoute) {
+  constructor(
+    route: ActivatedRoute,
+    private http: HttpClient,
+  ) {
     // Get the activity slug from the router
     this.activitySlug = route.snapshot.params['slug'];
-    this.activity = ACTIVITIES.find((activity) => activity.slug === this.activitySlug) || NULL_ACTIVITY;
+    // Get the activity from the server
+    const url = `http://localhost:3000/activities?slug=${this.activitySlug}`;
+    http.get<Activity[]>(url).subscribe((activities) => {
+      const activity = activities[0] || NULL_ACTIVITY;
+      this.activity = activity;
+    });
   }
 
   /** Function to enable or disable the booking button */
@@ -83,18 +94,40 @@ export class BookingsComponent {
 
   /** Event handler fired whe user clicks the booking button */
   public onBookClick() {
-    console.log('Reservar actividad', this.totalParticipants);
-    this.booked = true;
-    this.bookedMessage = `Booked ${this.newParticipants} participants for ${
-      this.activity.price * this.newParticipants
-    } dollars`;
-    if (this.totalParticipants === this.activity.maxParticipants) {
-      this.activity.status = 'sold-out';
-      return;
-    }
+    console.log('Booking activity', this.totalParticipants);
+    const newBooking: Booking = {
+      id: 0,
+      userId: 0,
+      activityId: this.activity.id,
+      date: new Date(),
+      participants: this.newParticipants,
+      payment: {
+        method: 'creditCard',
+        amount: this.activity.price * this.newParticipants,
+        status: 'pending',
+      },
+    };
+    this.http.post<Booking>('http://localhost:3000/bookings', newBooking).subscribe((booking: Booking) => {
+      this.booked = true;
+      this.bookedMessage = `Booked ${this.newParticipants} participants for ${booking.payment?.amount} dollars`;
+      this.updateActivityStatus();
+    });
+  }
+
+  private updateActivityStatus() {
+    let newStatus = this.activity.status;
     if (this.totalParticipants >= this.activity.minParticipants) {
-      this.activity.status = 'confirmed';
-      return;
+      newStatus = 'confirmed';
+    }
+    if (this.totalParticipants >= this.activity.maxParticipants) {
+      newStatus = 'sold-out';
+    }
+    if (newStatus !== this.activity.status) {
+      this.activity.status = newStatus;
+      const url = `http://localhost:3000/activities/${this.activity.id}`;
+      this.http.put<Activity>(url, this.activity).subscribe((activity: Activity) => {
+        console.log('Activity updated', activity);
+      });
     }
   }
 }

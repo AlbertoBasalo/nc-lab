@@ -17,22 +17,50 @@ npm run api
 ```
 
 ```typescript
-//config provider
-export const appConfig: ApplicationConfig = {
-  providers: [provideClientHydration(), provideHttpClient(), provideRouter(routes, withComponentInputBinding())],
-};
+//core module
+import { HttpClientModule } from "@angular/common/http";
+/** A module that holds one time used items(layout components, services...) */
+@NgModule({
+  declarations: [HeaderComponent, FooterComponent],
+  imports: [CommonModule, RouterModule, HttpClientModule],
+  exports: [HeaderComponent, FooterComponent],
+})
+export class CoreModule {}
 ```
 
 ```typescript
 // Home Page
-export default class HomePage {
-  #http$ = inject(HttpClient);
-  #apiUrl = "http://localhost:3000/activities";
-  activities = [];
-
-  constructor() {
-    this.#http$.get<Activity[]>(this.#apiUrl).subscribe((activities) => {
+@Component({
+  selector: "lab-home",
+  templateUrl: "./home.component.html",
+  styleUrls: ["./home.component.css"],
+})
+export class HomeComponent {
+  public activities: Activity[] = ACTIVITIES;
+  constructor(http: HttpClient) {
+    const url = "http://localhost:3000/activities";
+    http.get<Activity[]>(url).subscribe((activities) => {
       this.activities = activities;
+    });
+  }
+}
+```
+
+```typescript
+export class BookingsComponent {
+  /**
+   * Bookings Component constructor
+   * @param route The router service injected by Angular
+   * @param http The HttpClient service injected by Angular
+   */
+  constructor(route: ActivatedRoute, http: HttpClient) {
+    // Get the activity slug from the router
+    this.activitySlug = route.snapshot.params["slug"];
+    // Get the activity from the server
+    const url = `http://localhost:3000/activities?slug=${this.activitySlug}`;
+    http.get<Activity[]>(url).subscribe((activities) => {
+      const activity = activities[0] || NULL_ACTIVITY;
+      this.activity = activity;
     });
   }
 }
@@ -42,40 +70,97 @@ export default class HomePage {
 
 ```typescript
 // Bookings Page
-export default class BookingsPage {
-  #http$ = inject(HttpClient);
-  #activitiesUrl = "http://localhost:3000/activities";
-  #bookingsUrl = "http://localhost:3000/bookings";
-
-  onBookParticipantsClick() {
-    this.booked.set(true);
-    const newBooking: Booking = {
-      id: 0,
-      userId: 0,
-      activityId: this.activity().id,
-      date: new Date(),
-      participants: this.newParticipants(),
-      payment: {
-        method: "creditCard",
-        amount: this.bookingAmount(),
-        status: "pending",
-      },
-    };
-    this.#http$.post<Booking>(this.#bookingsUrl, newBooking).subscribe({
-      next: () => this.#updateActivityStatus(),
-      error: (error) => console.error("Error creating booking", error),
+export class BookingsComponent {
+  /**
+   * Bookings Component constructor
+   * @param route The router service injected by Angular
+   * @param http The HttpClient service injected by Angular
+   */
+  constructor(route: ActivatedRoute, private http: HttpClient) {
+    // Get the activity slug from the router
+    this.activitySlug = route.snapshot.params["slug"];
+    // Get the activity from the server
+    const url = `http://localhost:3000/activities?slug=${this.activitySlug}`;
+    http.get<Activity[]>(url).subscribe((activities) => {
+      const activity = activities[0] || NULL_ACTIVITY;
+      this.activity = activity;
     });
   }
 
-  #updateActivityStatus() {
-    const activityUrl = `${this.#activitiesUrl}/${this.activity().id}`;
-    this.#http$.put<Activity>(activityUrl, this.activity()).subscribe({
-      next: () => console.log("Activity status updated"),
-      error: (error) => console.error("Error updating activity", error),
+  /** Event handler fired whe user clicks the booking button */
+  public onBookClick() {
+    console.log("Booking activity", this.totalParticipants);
+    const newBooking: Booking = {
+      id: 0,
+      userId: 0,
+      activityId: this.activity.id,
+      date: new Date(),
+      participants: this.newParticipants,
+      payment: {
+        method: "creditCard",
+        amount: this.activity.price * this.newParticipants,
+        status: "pending",
+      },
+    };
+    this.http.post<Booking>("http://localhost:3000/bookings", newBooking).subscribe((booking: Booking) => {
+      this.booked = true;
+      this.bookedMessage = `Booked ${this.newParticipants} participants for ${booking.payment?.amount} dollars`;
+      if (this.totalParticipants === this.activity.maxParticipants) {
+        this.activity.status = "sold-out";
+        return;
+      }
+      if (this.totalParticipants >= this.activity.minParticipants) {
+        this.activity.status = "confirmed";
+        return;
+      }
     });
   }
 }
 ```
+
+```typescript
+export class BookingsComponent {
+/** Event handler fired whe user clicks the booking button */
+  public onBookClick() {
+    console.log('Booking activity', this.totalParticipants);
+    const newBooking: Booking = {
+      id: 0,
+      userId: 0,
+      activityId: this.activity.id,
+      date: new Date(),
+      participants: this.newParticipants,
+      payment: {
+        method: 'creditCard',
+        amount: this.activity.price * this.newParticipants,
+        status: 'pending',
+      },
+    };
+    this.http.post<Booking>('http://localhost:3000/bookings', newBooking).subscribe((booking: Booking) => {
+      this.booked = true;
+      this.bookedMessage = `Booked ${this.newParticipants} participants for ${booking.payment?.amount} dollars`;
+      this.updateActivityStatus();
+    });
+  }
+
+  private updateActivityStatus() {
+    let newStatus = this.activity.status;
+    if (this.totalParticipants >= this.activity.minParticipants) {
+      newStatus = 'confirmed';
+    }
+    if (this.totalParticipants >= this.activity.maxParticipants) {
+      newStatus = 'sold-out';
+    }
+    if (newStatus !== this.activity.status) {
+      this.activity.status = newStatus;
+      const url = `http://localhost:3000/activities/${this.activity.id}`;
+      this.http.put<Activity>(url, this.activity).subscribe((activity: Activity) => {
+        console.log('Activity updated', activity);
+      });
+    }
+  }
+```
+
+> To Do: pipe async...
 
 ## 5.2 Asincronismo y señales
 
