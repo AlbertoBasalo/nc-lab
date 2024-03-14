@@ -252,10 +252,8 @@ class BookingComponent {
   activity = NULL_ACTIVITY;
 
   constructor(private route: ActivatedRoute) {
-    this.route.params.subscribe((params) => {
-      this.slug = params.slug;
-      this.activity = ACTIVITIES.find((activity) => activity.slug === this.slug);
-    });
+    this.activitySlug = route.snapshot.params["slug"];
+    this.activity = ACTIVITIES.find((activity) => activity.slug === this.slug);
   }
 }
 ```
