@@ -1,4 +1,4 @@
-<article>
+<article *ngIf="activity$ | async as activity">
   <header>
     <h2>{{ activity.name }}</h2>
     <div [class]="activity.status">

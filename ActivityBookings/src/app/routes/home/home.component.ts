@@ -1,25 +1,23 @@
 import { HttpClient } from '@angular/common/http';
-import { Component } from '@angular/core';
-import { ACTIVITIES } from 'src/app/shared/domain/activities.data';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Observable } from 'rxjs';
 import { Activity } from 'src/app/shared/domain/activity.type';
 
 @Component({
   selector: 'lab-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeComponent {
-  /** The array of activities */
-  public activities: Activity[] = ACTIVITIES;
+  private url: string = 'http://localhost:3000/activities';
+
+  /** The observable of array of activities from the API*/
+  public activities$: Observable<Activity[]> = this.http.get<Activity[]>(this.url);
 
   /**
    * HomeComponent constructor
-   * @param http HttpClient service injected by Angular
+   * @param http HttpClient service injected by Angular, usable inside the component
    */
-  constructor(http: HttpClient) {
-    const url = 'http://localhost:3000/activities';
-    http.get<Activity[]>(url).subscribe((activities) => {
-      this.activities = activities;
-    });
-  }
+  constructor(private http: HttpClient) {}
 }

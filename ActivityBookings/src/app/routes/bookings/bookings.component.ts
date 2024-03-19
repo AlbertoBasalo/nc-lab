@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Observable, map, tap } from 'rxjs';
 import { Booking } from 'src/app/shared/domain/booking.type';
-import { ACTIVITIES } from '../../shared/domain/activities.data';
 import { Activity, NULL_ACTIVITY } from '../../shared/domain/activity.type';
 import { Participant } from '../../shared/domain/participant.type';
 
@@ -10,10 +10,14 @@ import { Participant } from '../../shared/domain/participant.type';
   selector: 'lab-bookings',
   templateUrl: './bookings.component.html',
   styleUrls: ['./bookings.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BookingsComponent {
-  /** Activity object selecto from the array */
-  public activity: Activity = ACTIVITIES[3];
+  private url: string = 'http://localhost:3000/activities';
+  /** Activity object used at the controller*/
+  private activity: Activity = NULL_ACTIVITY;
+  /** Activity observable used at the template */
+  public activity$: Observable<Activity>;
 
   /**  Supposed already booked places */
   public currentParticipants: number = 2;
@@ -28,13 +32,13 @@ export class BookingsComponent {
   public totalParticipants: number = this.currentParticipants + this.newParticipants;
 
   /** The maximum available places */
-  public maxNewParticipants: number = this.activity.maxParticipants - this.currentParticipants;
+  public maxNewParticipants: number = 0;
 
   /** Flag indicating if the booking was saved*/
   public booked: boolean = false;
 
   /** Message indicating the range of places available*/
-  public activityRangeMessage: string = `The activity is available for ${this.activity.minParticipants} to ${this.activity.maxParticipants} participants`;
+  public activityRangeMessage: string = ``;
 
   /** Feedback message whe the booking is saved */
   public bookedMessage: string = '';
@@ -43,7 +47,7 @@ export class BookingsComponent {
   public activitySlug: string = '';
 
   /**
-   * Bookings Component constructor
+   * Component constructor
    * @param route The router service injected by Angular
    * @param http The HttpClient service injected by Angular
    */
@@ -52,13 +56,16 @@ export class BookingsComponent {
     private http: HttpClient,
   ) {
     // Get the activity slug from the router
-    this.activitySlug = route.snapshot.params['slug'];
-    // Get the activity from the server
-    const url = `http://localhost:3000/activities?slug=${this.activitySlug}`;
-    http.get<Activity[]>(url).subscribe((activities) => {
-      const activity = activities[0] || NULL_ACTIVITY;
-      this.activity = activity;
-    });
+    const activitySlug = route.snapshot.params['slug'];
+    const slugUrl = `${this.url}?slug=${activitySlug}`;
+    this.activity$ = this.http.get<Activity[]>(slugUrl).pipe(
+      map((activities: Activity[]) => activities[0]),
+      tap((activity: Activity) => {
+        this.activity = activity;
+        this.maxNewParticipants = activity.maxParticipants - this.currentParticipants;
+        this.activityRangeMessage = `The activity is available for ${activity.minParticipants} to ${activity.maxParticipants} participants`;
+      }),
+    );
   }
 
   /** Function to enable or disable the booking button */

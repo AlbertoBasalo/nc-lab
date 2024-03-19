@@ -1,7 +1,13 @@
-<h3>We have {{ activities.length }} activities</h3>
-<div *ngFor="let activity of activities">
-  <span>
-    <a [routerLink]="['/', 'bookings', activity.slug]">{{ activity.name }}</a>
-  </span>
-  <span>at {{ activity.location }} on {{ activity.date | date }}</span>
-</div>
+<article *ngIf="activities$ | async as activities">
+  <header>
+    <h3>We have {{ activities.length }} activities</h3>
+  </header>
+  <main>
+    <div *ngFor="let activity of activities">
+      <span>
+        <a [routerLink]="['/', 'bookings', activity.slug]">{{ activity.name }}</a>
+      </span>
+      <span>at {{ activity.location }} on {{ activity.date | date }}</span>
+    </div>
+  </main>
+</article>

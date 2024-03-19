@@ -3,9 +3,10 @@ import { NgModule } from '@angular/core';
 
 import { HomeRoutingModule } from './home-routing.module';
 import { HomeComponent } from './home.component';
+import { ActivitiesComponent } from './activities/activities.component';
 
 @NgModule({
-  declarations: [HomeComponent],
+  declarations: [HomeComponent, ActivitiesComponent],
   imports: [CommonModule, HomeRoutingModule],
 })
 export class HomeModule {}
