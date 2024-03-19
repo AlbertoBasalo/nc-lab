@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Activity } from 'src/app/shared/domain/activity.type';
 
 @Component({
@@ -8,4 +8,6 @@ import { Activity } from 'src/app/shared/domain/activity.type';
 })
 export class ActivitiesComponent {
   @Input() public activities: Activity[] = [];
+  @Input() public favorites: string[] = [];
+  @Output() public toggleFavorite = new EventEmitter<string>();
 }

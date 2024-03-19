@@ -1,1 +1,5 @@
-<lab-activities *ngIf="activities$ | async as activities" [activities]="activities"></lab-activities>
+<ng-container *ngIf="activities$ | async as activities">
+  <lab-activities [activities]="activities" [favorites]="favorites" (toggleFavorite)="onToggleFavorite($event)">
+  </lab-activities>
+  <lab-footer [activitiesCount]="activities.length" [favoritesCount]="favorites.length"> </lab-footer>
+</ng-container>
