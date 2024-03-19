@@ -91,8 +91,6 @@ export class HomeComponent {
 }
 ```
 
-````typescript
-
 ## 6.2 Servicios e inyección de dependencias
 
 `ng g s routes/home/home`
@@ -118,7 +116,7 @@ export class HomeService {
     return this.http.get<Activity[]>(this.url);
   }
 }
-````
+```
 
 ```typescript
 export class HomeComponent {
@@ -134,3 +132,73 @@ export class HomeComponent {
 ```
 
 ## 6.3 Un almacén global basado en Subjects
+
+`ng g s shared/state/favorites-store`
+
+```typescript
+@Injectable({
+  providedIn: "root",
+})
+export class FavoritesStoreService {
+  private state = new BehaviorSubject<string[]>([]);
+  public state$ = this.state.asObservable();
+
+  public setFavorites(favorites: string[]): void {
+    this.state.next(favorites);
+  }
+}
+```
+
+```typescript
+export class HomeComponent {
+  /** The observable of array of activities from the API*/
+  public activities$: Observable<Activity[]> = this.service.getActivities$();
+
+  public favorites: string[] = [];
+  /**
+   * HomeComponent constructor
+   * @param service HomeService service with data and logic for the HomeComponent
+   * @param favoritesStore FavoritesStoreService service to manage the favorites state
+   */
+  constructor(private service: HomeService, private favoritesStore: FavoritesStoreService) {}
+
+  public onToggleFavorite(slug: string): void {
+    const index = this.favorites.indexOf(slug);
+    if (index === -1) {
+      this.favorites.push(slug);
+    } else {
+      this.favorites.splice(index, 1);
+    }
+    this.favoritesStore.setFavorites(this.favorites);
+  }
+}
+```
+
+```typescript
+export class HeaderComponent {
+  title = "Activity Bookings";
+  favorites$ = this.favoritesStore.state$;
+
+  constructor(private favoritesStore: FavoritesStoreService) {}
+}
+```
+
+```html
+<header>
+  <nav>
+    <ul>
+      <a href="/" class="title">{{ title }}</a>
+    </ul>
+    <ul>
+      <li>
+        My favorites
+        <sup>
+          <mark>{{ (favorites$ | async)?.length || 0 }}</mark>
+        </sup>
+      </li>
+      <li><a [routerLink]="['/', 'auth', 'login']">Login</a></li>
+      <li><a [routerLink]="['/', 'auth', 'register']">Register</a></li>
+    </ul>
+  </nav>
+</header>
+```

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Activity } from 'src/app/shared/domain/activity.type';
+import { FavoritesStoreService } from 'src/app/shared/state/favorites-store.service';
 import { HomeService } from './home.service';
 
 @Component({
@@ -17,8 +18,12 @@ export class HomeComponent {
   /**
    * HomeComponent constructor
    * @param service HomeService service with data and logic for the HomeComponent
+   * @param favoritesStore FavoritesStoreService service to manage the favorites state
    */
-  constructor(private service: HomeService) {}
+  constructor(
+    private service: HomeService,
+    private favoritesStore: FavoritesStoreService,
+  ) {}
 
   public onToggleFavorite(slug: string): void {
     const index = this.favorites.indexOf(slug);
@@ -27,5 +32,6 @@ export class HomeComponent {
     } else {
       this.favorites.splice(index, 1);
     }
+    this.favoritesStore.setFavorites(this.favorites);
   }
 }

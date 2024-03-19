@@ -4,6 +4,12 @@
       <a href="/" class="title">{{ title }}</a>
     </ul>
     <ul>
+      <li>
+        My favorites
+        <sup>
+          <mark>{{ (favorites$ | async)?.length || 0 }}</mark>
+        </sup>
+      </li>
       <li><a [routerLink]="['/', 'auth', 'login']">Login</a></li>
       <li><a [routerLink]="['/', 'auth', 'register']">Register</a></li>
     </ul>
