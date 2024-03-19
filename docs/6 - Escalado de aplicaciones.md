@@ -5,13 +5,10 @@
 ` ng g c routes/home/activities`
 
 ```typescript
-@Component({
-  selector: "lab-activities",
-  templateUrl: "./activities.component.html",
-  styleUrls: ["./activities.component.css"],
-})
 export class ActivitiesComponent {
   @Input() public activities: Activity[] = [];
+  @Input() public favorites: string[] = [];
+  @Output() public toggleFavorite = new EventEmitter<string>();
 }
 ```
 
@@ -23,6 +20,12 @@ export class ActivitiesComponent {
   <main>
     <div *ngFor="let activity of activities">
       <span>
+        <input
+          type="checkbox"
+          [checked]="favorites.includes(activity.slug)"
+          (click)="toggleFavorite.emit(activity.slug)" />
+      </span>
+      <span>
         <a [routerLink]="['/', 'bookings', activity.slug]">{{ activity.name }}</a>
       </span>
       <span>at {{ activity.location }} on {{ activity.date | date }}</span>
@@ -31,9 +34,64 @@ export class ActivitiesComponent {
 </article>
 ```
 
-```html
-<lab-activities *ngIf="activities$ | async as activities" [activities]="activities"></lab-activities>
+`ng g c routes/home/footer`
+
+```typescript
+export class FooterComponent {
+  @Input() public activitiesCount: number = 0;
+  @Input() public favoritesCount: number = 0;
+}
 ```
+
+```html
+<small>
+  <span>
+    Got
+    <mark>{{ activitiesCount }}</mark>
+    activities.
+  </span>
+  <span>
+    You have selected
+    <mark>{{ favoritesCount }}</mark>
+    favorites.
+  </span>
+</small>
+```
+
+```html
+<ng-container *ngIf="activities$ | async as activities">
+  <lab-activities
+    [activities]="activities"
+    [favorites]="favorites"
+    (toggleFavorite)="onToggleFavorite($event)"></lab-activities>
+  <lab-footer [activitiesCount]="activities.length" [favoritesCount]="favorites.length"></lab-footer>
+</ng-container>
+```
+
+```typescript
+export class HomeComponent {
+  /** The observable of array of activities from the API*/
+  public activities$: Observable<Activity[]> = this.service.getActivities$();
+
+  public favorites: string[] = [];
+  /**
+   * HomeComponent constructor
+   * @param service HomeService service with data and logic for the HomeComponent
+   */
+  constructor(private service: HomeService) {}
+
+  public onToggleFavorite(slug: string): void {
+    const index = this.favorites.indexOf(slug);
+    if (index === -1) {
+      this.favorites.push(slug);
+    } else {
+      this.favorites.splice(index, 1);
+    }
+  }
+}
+```
+
+````typescript
 
 ## 6.2 Servicios e inyección de dependencias
 
@@ -60,7 +118,7 @@ export class HomeService {
     return this.http.get<Activity[]>(this.url);
   }
 }
-```
+````
 
 ```typescript
 export class HomeComponent {
