@@ -3,28 +3,57 @@
     <h2>Register</h2>
   </header>
   <main>
-    <form>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
       <label for="username">
-        <span>Username</span>
-        <input id="username" type="text" />
+        <span>
+          Username
+          <small *ngIf="form.controls['userName'].errors">{{ form.controls['userName'].errors | json }}</small>
+        </span>
+        <input
+          id="username"
+          type="text"
+          formControlName="userName"
+          [attr.aria-invalid]="form.controls['userName'].invalid" />
       </label>
       <label for="email">
-        <span>Email</span>
-        <input id="email" type="email" />
+        <span>
+          Email
+          <small *ngIf="form.controls['email'].errors">{{ form.controls['email'].errors | json }}</small>
+        </span>
+        <input id="email" type="email" formControlName="email" [attr.aria-invalid]="form.controls['email'].invalid" />
       </label>
       <label for="password">
-        <span>Password</span>
-        <input id="password" type="password" />
+        <span>
+          Password
+          <small *ngIf="form.controls['password'].errors">{{ form.controls['password'].errors | json }}</small>
+        </span>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          [attr.aria-invalid]="form.controls['password'].invalid" />
       </label>
-      <label for="confirm">
-        <span>Confirm Password</span>
-        <input id="confirm" type="password" />
+      <label for="confirmPassword">
+        <span>
+          Confirm Password
+          <small *ngIf="form.controls['confirmPassword'].errors">
+            {{ form.controls['confirmPassword'].errors | json }}
+          </small>
+        </span>
+        <input
+          id="confirmPassword"
+          type="password"
+          formControlName="confirmPassword"
+          [attr.aria-invalid]="form.controls['confirmPassword'].invalid" />
       </label>
-      <label for="terms">
-        <span>Accept the terms and conditions</span>
-        <input id="terms" type="checkbox" />
+      <label for="acceptTerms">
+        <span>
+          Accept the terms and conditions
+          <small *ngIf="form.controls['acceptTerms'].errors">{{ form.controls['acceptTerms'].errors | json }}</small>
+        </span>
+        <input id="acceptTerms" type="checkbox" formControlName="acceptTerms" />
       </label>
-      <button type="submit">Login</button>
+      <button [disabled]="form.invalid" type="submit">Login</button>
     </form>
   </main>
   <footer>
