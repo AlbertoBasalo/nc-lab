@@ -1,11 +1,16 @@
 {
   "name": "activity-bookings",
   "version": "15.2.0",
-  "description": "Booking and management of activities",
+  "description": "Activity administration and booking",
   "author": {
     "name": "Alberto Basalo",
     "url": "https://albertobasalo.dev"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AlbertoBasalo/nc-lab.git"
+  },
+  "homepage": "https://albertobasalo.notion.site/Angular-Basics-V15-489fd8ccf4fb4e3dba7827628608b4cb",
   "scripts": {
     "ng": "ng",
     "chrome": "start chrome -incognito -auto-open-devtools-for-tabs http://localhost:4200",

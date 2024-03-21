@@ -1,11 +1,10 @@
 # nc-lab
 
-Laboratorio para [cursos y talleres de Angular](./docs/0%20-%20Angular%20Moderno%20V17.md) impartidos en Español por [Alberto Basalo](https://albertobasalo.dev)
+[Laboratorio de ejemplo](https://github.com/albertobasalo/nc-lab) para cursos y talleres de [Angular Basics Classic](https://albertobasalo.notion.site/Angular-Basics-V15-489fd8ccf4fb4e3dba7827628608b4cb) impartidos en Español por [Alberto Basalo](https://albertobasalo.dev)
 
 > [!NOTE]
-> Angular sample _Activity Bookings_ application is at [ActivityBookings](./ActivityBookings) folder
-
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 15.2.0.
+> This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version _15.2.0._
+> Sample project is at `ActivityBookings` folder
 
 ```bash
 # clone lab from github
@@ -19,9 +18,8 @@ npm start
 npm run api:seed
 ```
 
-## Documentation
-
-Find detailed journal of instructions in [CLI.md](./docs/CLI.md)
+> [!TIP] > **Documentation**
+> Find detailed journal of instructions in [docs folder](./docs/)
 
 ### Folder structure
 
